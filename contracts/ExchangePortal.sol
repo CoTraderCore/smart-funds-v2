@@ -17,6 +17,11 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   ParaswapInterface public paraswapInterface;
   IPriceFeed public priceFeedInterface;
 
+  enum ExchangeType { Paraswap }
+
+  // Paraswap recognizes ETH by this address
+  ERC20 constant private ETH_TOKEN_ADDRESS = ERC20(0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+
   mapping (address => bool) disabledTokens;
 
   event Trade(address trader, address src, uint256 srcAmount, address dest, uint256 destReceived, uint8 exchangeType);
@@ -30,6 +35,8 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   /**
   * @dev contructor
   *
+  * @param _paraswap        paraswap main address
+  * @param _paraswapPrice   paraswap price feed address
   */
   constructor(address _paraswap, address _paraswapPrice) public {
     paraswapInterface = paraswapInterface(_paraswap);
@@ -43,7 +50,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   * @param _source            ERC20 token to convert from
   * @param _sourceAmount      Amount to convert from (in _source token)
   * @param _destination       ERC20 token to convert to
-  * @param _type              The type of exchange to trade with (NOT USED for now)
+  * @param _type              The type of exchange to trade with (For now 0 - because only paraswap)
   * @param _additionalArgs    Array of bytes32 additional arguments
   *
   * @return The amount of _destination received from the trade
@@ -71,10 +78,11 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
       require(msg.value == 0);
     }
 
+    if (_type == uint(ExchangeType.Paraswap)) {
     // SHOULD TRADE PARASWAP HERE
-    // PROBLEM Contract not return info
+    // PROBLEM Contract Paraswap not return info so we should get this info
     // So we need calculate receivedAmount
-    receivedAmount = paraswapInterface.swap(
+    receivedAmount = _tradeViaParaswap(
       _source,
       _destination,
       _sourceAmount,
@@ -87,7 +95,10 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
       uint256[] _additionalArgs[4], // memory values,
       uint256 _additionalArgs[5] // mintPrice
     )
-
+    } else {
+      // unknown exchange type
+      revert();
+    }
 
     // Check if Ether was received
     if (_destination == ETH_TOKEN_ADDRESS) {
@@ -113,6 +124,54 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
     return receivedAmount;
   }
+
+  // Paraswap trade helper (NOT worked yet)
+  // TODO get function for calculate recieve return data and describe this
+  function _tradeViaParaswap(
+    address sourceToken,
+    address destinationToken,
+    uint256 sourceAmount,
+    uint256 minDestinationAmount,
+    address[] memory callees,
+    bytes memory exchangeData,
+    uint256[] memory startIndexes,
+    uint256[] memory values,
+    uint256 mintPrice
+ )
+   private
+   returns (uint256)
+ {
+   uint256 destinationReceived;
+
+   if (_source == ETH_TOKEN_ADDRESS) {
+     destinationReceived = paraswapInterface.swap.value(_sourceAmount)(
+       sourceToken,
+       destinationToken,
+       sourceAmount,
+       minDestinationAmount,
+       callees,
+       exchangeData,
+       startIndexes,
+       values,
+       mintPrice
+     );
+   } else {
+     _transferFromSenderAndApproveTo(_source, _sourceAmount, kyber);
+     destinationReceived = paraswapInterface.swap(
+       sourceToken,
+       destinationToken,
+       sourceAmount,
+       minDestinationAmount,
+       callees,
+       exchangeData,
+       startIndexes,
+       values,
+       mintPrice
+     );
+   }
+
+   return destinationReceived;
+ }
 
   /**
   * @dev Transfers tokens to this contract and approves them to another address
