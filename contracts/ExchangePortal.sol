@@ -1,10 +1,11 @@
 pragma solidity ^0.4.24;
 
 import "./ExchangePortalInterface.sol";
-import "./kyber/KyberNetworkInterface.sol";
 import "./zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./zeppelin-solidity/contracts/math/SafeMath.sol";
 import "./zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
+import "./paraswap/ParaswapInterface";
+import "./paraswap/IPriceFeed";
 
 /*
 * The ExchangePortal contract is an implementation of ExchangePortalInterface that allows
@@ -12,13 +13,9 @@ import "./zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
 */
 contract ExchangePortal is ExchangePortalInterface, Ownable {
   using SafeMath for uint256;
-  
-  enum ExchangeType { Kyber }
 
-  KyberNetworkInterface kyber;
-
-  // KyberExchange recognizes ETH by this address
-  ERC20 constant private ETH_TOKEN_ADDRESS = ERC20(0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+  ParaswapInterface public paraswapInterface;
+  IPriceFeed public priceFeedInterface;
 
   mapping (address => bool) disabledTokens;
 
@@ -33,11 +30,12 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   /**
   * @dev contructor
   *
-  * @param _kyber    Address of Kyber exchange to trade with
   */
-  constructor(address _kyber) public {
-    kyber = KyberNetworkInterface(_kyber);
+  constructor(address _paraswap, address _paraswapPrice) public {
+    paraswapInterface = paraswapInterface(_paraswap);
+    priceFeedInterface = IPriceFeed(_paraswapPrice);
   }
+
 
   /**
   * @dev Facilitates a trade for a SmartFund
@@ -45,7 +43,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   * @param _source            ERC20 token to convert from
   * @param _sourceAmount      Amount to convert from (in _source token)
   * @param _destination       ERC20 token to convert to
-  * @param _type              The type of exchange to trade with
+  * @param _type              The type of exchange to trade with (NOT USED for now)
   * @param _additionalArgs    Array of bytes32 additional arguments
   *
   * @return The amount of _destination received from the trade
@@ -56,41 +54,41 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     ERC20 _destination,
     uint256 _type,
     bytes32[] _additionalArgs
-  ) 
+  )
     external
     payable
     tokenEnabled(_destination)
     returns (uint256)
   {
-    
+
     require(_source != _destination);
 
     uint256 receivedAmount;
-    
+
     if (_source == ETH_TOKEN_ADDRESS) {
       require(msg.value == _sourceAmount);
     } else {
       require(msg.value == 0);
     }
 
-    if (_type == uint(ExchangeType.Kyber)) {
-      uint256 maxDestinationAmount = uint256(_additionalArgs[0]);
-      uint256 minConversionRate = uint256(_additionalArgs[1]);
-      address walletId = address(_additionalArgs[2]);      
+    // SHOULD TRADE PARASWAP HERE
+    // PROBLEM Contract not return info
+    // So we need calculate receivedAmount
+    receivedAmount = paraswapInterface.swap(
+      _source,
+      _destination,
+      _sourceAmount,
 
-      receivedAmount = _tradeKyber(
-        _source,
-        _sourceAmount,
-        _destination,
-        maxDestinationAmount,
-        minConversionRate,
-        walletId
-      );
-    } else {
-      // unknown exchange type
-      revert();
-    }
-    
+      // TODO Function for correct converts from bytes
+      uint256(_additionalArgs[0]),  // minDestinationAmount,
+      address[] _additionalArgs[1], // memory callees,
+      bytes _additionalArgs[2], // memory exchangeData,
+      uint256[] _additionalArgs[3], // memory startIndexes,
+      uint256[] _additionalArgs[4], // memory values,
+      uint256 _additionalArgs[5] // mintPrice
+    )
+
+
     // Check if Ether was received
     if (_destination == ETH_TOKEN_ADDRESS) {
       (msg.sender).transfer(receivedAmount);
@@ -117,57 +115,6 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   }
 
   /**
-  * @dev Facilitates a trade between this contract and KyberExchange
-  *
-  * @param _source                  ERC20 token to convert from
-  * @param _sourceAmount            Amount to convert from (in _source token)
-  * @param _destination             ERC20 token to convert to
-  * @param _maxDestinationAmount    The maximum amount of _destination to receive in this trade
-  * @param _minConversionRate       The minimum conversion rate we're willing to trade for
-  * @param _walletId                Address of the wallet that will receive a cut of the trade
-  *
-  * @return The amount of _destination received from the trade
-  */
-  function _tradeKyber(
-    ERC20 _source,
-    uint256 _sourceAmount,
-    ERC20 _destination,
-    uint256 _maxDestinationAmount,
-    uint256 _minConversionRate,
-    address _walletId
-  )
-    private
-    returns (uint256)
-  {
-    uint256 destinationReceived;
-
-    if (_source == ETH_TOKEN_ADDRESS) {
-      destinationReceived = kyber.trade.value(_sourceAmount)(
-        _source,
-        _sourceAmount,
-        _destination,
-        this,
-        _maxDestinationAmount,
-        _minConversionRate,
-        _walletId
-      );
-    } else {
-      _transferFromSenderAndApproveTo(_source, _sourceAmount, kyber);
-      destinationReceived = kyber.trade(
-        _source,
-        _sourceAmount,
-        _destination,
-        this,
-        _maxDestinationAmount,
-        _minConversionRate,
-        _walletId
-      );
-    }
-    
-    return destinationReceived;
-  }
-
-  /**
   * @dev Transfers tokens to this contract and approves them to another address
   *
   * @param _source          Token to transfer and approve
@@ -190,15 +137,22 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   * @return The value of `_amount` amount of _from in terms of _to
   */
   function getValue(address _from, address _to, uint256 _amount) public view returns (uint256) {
-    (uint256 expectedRate, ) = kyber.getExpectedRate(ERC20(_from), ERC20(_to), _amount);
-    uint256 value = expectedRate * _amount / (10 ** uint256(DetailedERC20(_from).decimals()));
-    
+     // SHOULD GET VALUE FROM PARASWAP HERE
+     uint256 expectedRate = getValueFromParaswap(ERC20(_from), ERC20(_to), _amount);
+     uint256 value = expectedRate * _amount / (10 ** uint256(DetailedERC20(_from).decimals()));
+
     return value;
   }
-  
+
+  // NOT FINISHED
+  // Should check token and return best price
+  function getValueFromParaswap(address _from, address _to, uint256 _amount) private view returns (uint256){
+    return priceFeedInterface.getBestPrice(_from, _to, _amount);
+  }
+
   /**
   * @dev Gets the total value of array of tokens and amounts
-  * 
+  *
   * @param _fromAddresses    Addresses of all the tokens we're converting from
   * @param _amounts          The amounts of all the tokens
   * @param _to               The token who's value we're converting to
@@ -227,5 +181,5 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
   // fallback payable function to receive ether from other contract addresses
   function() public payable {}
-  
+
 }
