@@ -16,6 +16,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
   ParaswapInterface public paraswapInterface;
   IPriceFeed public priceFeedInterface;
+  address public paraswap;
 
   enum ExchangeType { Paraswap }
 
@@ -41,6 +42,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   constructor(address _paraswap, address _paraswapPrice) public {
     paraswapInterface = paraswapInterface(_paraswap);
     priceFeedInterface = IPriceFeed(_paraswapPrice);
+    paraswap = _paraswap;
   }
 
 
@@ -156,7 +158,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
        mintPrice
      );
    } else {
-     _transferFromSenderAndApproveTo(_source, _sourceAmount, kyber);
+     _transferFromSenderAndApproveTo(_source, _sourceAmount, paraswap);
      destinationReceived = paraswapInterface.swap(
        sourceToken,
        destinationToken,
