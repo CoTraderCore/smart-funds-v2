@@ -110,7 +110,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     }
 
     // After the trade, any _source that exchangePortal holds will be sent back to msg.sender
-    uint256 endAmount = (_source == ETH_TOKEN_ADDRESS) ? this.balance : _source.balanceOf(this);
+    uint256 endAmount = (_source == ETH_TOKEN_ADDRESS) ? address(this).balance : _source.balanceOf(this);
 
     // Check if we hold a positive amount of _source
     if (endAmount > 0) {
@@ -176,7 +176,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
  function tokenBalance(ERC20 _token) private view returns (uint256) {
    if (_token == ETH_TOKEN_ADDRESS)
-     return this.balance;
+     return address(this).balance;
    return _token.balanceOf(this);
  }
 
@@ -246,19 +246,19 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   }
 
   // helpers
-  function getAddressArrayFromBytes32(bytes32 _inputArray) private view returns(address[]){
-    address[] storage output;
+  function getAddressArrayFromBytes32(bytes32 _inputArray) private pure returns(address[]){
+    address[] memory output;
     for(uint i = 0; i<_inputArray.length; i++){
-      output.push(FromBytes32.bytesToAddress(_inputArray[i]));
+      output[i] = (FromBytes32.bytesToAddress(_inputArray[i]));
     }
 
     return output;
   }
 
-  function getUintArrayFromBytes32(bytes32 _inputArray) private view returns(uint256[]){
-    uint256[] storage output;
+  function getUintArrayFromBytes32(bytes32 _inputArray) private pure returns(uint256[]){
+    uint256[] memory output;
     for(uint i = 0; i<_inputArray.length; i++){
-      output.push(uint256(_inputArray[i]));
+      output[i] = (uint256(_inputArray[i]));
     }
 
     return output;
