@@ -4,6 +4,7 @@ import "./ExchangePortalInterface.sol";
 import "./zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./zeppelin-solidity/contracts/math/SafeMath.sol";
 import "./zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
+import "./helpers/addressFromBytes32.sol";
 import "./paraswap/ParaswapInterface";
 import "./paraswap/IPriceFeed";
 
@@ -13,6 +14,7 @@ import "./paraswap/IPriceFeed";
 */
 contract ExchangePortal is ExchangePortalInterface, Ownable {
   using SafeMath for uint256;
+  using addressFromBytes32 for bytes32;
 
   ParaswapInterface public paraswapInterface;
   IPriceFeed public priceFeedInterface;
@@ -82,19 +84,23 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
     // SHOULD TRADE PARASWAP HERE
     if (_type == uint(ExchangeType.Paraswap)) {
-    receivedAmount = _tradeViaParaswap(
-      _source,
-      _destination,
-      _sourceAmount,
+      // convert bytes arrays to address and uint
+      address[] memory callees = getAddressArrayFromBytes32(_additionalArgs[1]);
+      uint256[] memory startIndexes = getUintArrayFromBytes32(_additionalArgs[3]);
+      uint256[] memory values = getUintArrayFromBytes32(_additionalArgs[4])
 
-      // TODO write function for correct converts from bytes
-      uint256(_additionalArgs[0]),  // minDestinationAmount,
-      address[] _additionalArgs[1], // memory callees,
-      bytes _additionalArgs[2], // memory exchangeData,
-      uint256[] _additionalArgs[3], // memory startIndexes,
-      uint256[] _additionalArgs[4], // memory values,
-      uint256 _additionalArgs[5] // mintPrice
-    )
+      // call paraswap 
+      receivedAmount = _tradeViaParaswap(
+          _source,
+          _destination,
+          _sourceAmount,
+          uint256(_additionalArgs[0]),  // minDestinationAmount,
+          callees, // callees,
+          bytes(_additionalArgs[2]), // memory exchangeData,
+          startIndexes, // memory startIndexes,
+          values, // memory values,
+          uint256 _additionalArgs[5] // mintPrice
+      )
     } else {
       // unknown exchange type
       revert();
@@ -242,6 +248,25 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   */
   function setToken(address _token, bool _enabled) external onlyOwner {
     disabledTokens[_token] = _enabled;
+  }
+
+  // helpers
+  function getAddressArrayFromBytes32(bytes32[] _inputArray) private view returns(address[]){
+    address[] memory output;
+    for(uint i = 0; i<_additionalArgs[1].length; i++){
+      callees.push(addressFromBytes32.bytesToAddress(_inputArray[i]))
+    }
+
+    return output;
+  }
+
+  function getUintArrayFromBytes32(bytes32[] _inputArray) private view returns(address[]){
+    address[] memory output;
+    for(uint i = 0; i<_additionalArgs[1].length; i++){
+      callees.push(uint256(_inputArray[i]))
+    }
+
+    return output;
   }
 
   // fallback payable function to receive ether from other contract addresses
