@@ -1,4 +1,5 @@
 pragma solidity 0.5.10;
+pragma experimental ABIEncoderV2;
 
 interface IPriceFeed {
   struct OptimalRate {
@@ -13,7 +14,7 @@ interface IPriceFeed {
     uint Oasis;
   }
 
-  function getBestPrice(address fromToken, address toToken, uint srcAmount) public view returns (OptimalRate memory optimalRate);
+  function getBestPrice(address fromToken, address toToken, uint srcAmount) external view returns (OptimalRate memory optimalRate);
 
   function getBancorRelayer(address token) external view returns (address);
 }

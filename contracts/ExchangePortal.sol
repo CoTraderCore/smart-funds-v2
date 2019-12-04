@@ -81,9 +81,8 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     }
 
     if (_type == uint(ExchangeType.Paraswap)) {
+
     // SHOULD TRADE PARASWAP HERE
-    // PROBLEM Contract Paraswap not return info so we should get this info
-    // So we need calculate receivedAmount
     receivedAmount = _tradeViaParaswap(
       _source,
       _destination,
@@ -127,8 +126,8 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     return receivedAmount;
   }
 
-  // Paraswap trade helper (NOT worked yet)
-  // TODO get function for calculate recieve return data and describe this
+  // Paraswap trade helper
+  // TODO describe this
   function _tradeViaParaswap(
     address sourceToken,
     address destinationToken,
@@ -143,7 +142,6 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
    private
    returns (uint256)
  {
-   uint256 destinationReceived;
 
    if (_source == ETH_TOKEN_ADDRESS) {
      destinationReceived = paraswapInterface.swap.value(_sourceAmount)(
@@ -172,7 +170,14 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
      );
    }
 
-   return destinationReceived;
+   uint256 destinationReceived = tokenBalance(destinationToken, address(this));
+   return destinationReceive;
+ }
+
+ function tokenBalance(ERC20 _token) private view returns (uint256) {
+   if (_token == ETH_TOKEN_ADDRESS)
+     return this.balance;
+   return _token.balanceOf(this);
  }
 
   /**

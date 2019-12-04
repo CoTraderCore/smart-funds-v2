@@ -39,6 +39,7 @@ contract SmartFundRegistry is Ownable {
     platformFee = _platformFee;
     exchangePortalAddress = _exchangePortalAddress;
     permittedExchangesAddress = _permittedExchangesAddress;
+    permittedExchanges = PermittedExchangesInterface(permittedExchanges);
   }
 
   /**
@@ -48,7 +49,7 @@ contract SmartFundRegistry is Ownable {
   * @param _successFee    The fund managers success fee
   */
   function createSmartFund(string _name, uint256 _successFee) public {
-    
+
     // Require that the funds success fee be less than the maximum allowed amount
     require(_successFee <= maximumSuccessFee);
 
@@ -63,7 +64,7 @@ contract SmartFundRegistry is Ownable {
       exchangePortalAddress,
       permittedExchangesAddress
     );
-    
+
     smartFunds.push(smartFund);
 
     emit SmartFundAdded(address(smartFund), owner);
