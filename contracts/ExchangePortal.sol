@@ -4,9 +4,9 @@ import "./ExchangePortalInterface.sol";
 import "./zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./zeppelin-solidity/contracts/math/SafeMath.sol";
 import "./zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
-import "./helpers/addressFromBytes32.sol";
-import "./paraswap/ParaswapInterface";
-import "./paraswap/IPriceFeed";
+import "./helpers/FromBytes32.sol";
+import "./paraswap/ParaswapInterface.sol";
+import "./paraswap/IPriceFeed.sol";
 
 /*
 * The ExchangePortal contract is an implementation of ExchangePortalInterface that allows
@@ -14,7 +14,7 @@ import "./paraswap/IPriceFeed";
 */
 contract ExchangePortal is ExchangePortalInterface, Ownable {
   using SafeMath for uint256;
-  using addressFromBytes32 for bytes32;
+  using FromBytes32 for bytes32;
 
   ParaswapInterface public paraswapInterface;
   IPriceFeed public priceFeedInterface;
@@ -42,7 +42,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   * @param _paraswapPrice   paraswap price feed address
   */
   constructor(address _paraswap, address _paraswapPrice) public {
-    paraswapInterface = paraswapInterface(_paraswap);
+    paraswapInterface = ParaswapInterface(_paraswap);
     priceFeedInterface = IPriceFeed(_paraswapPrice);
     paraswap = _paraswap;
   }
@@ -84,23 +84,18 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
     // SHOULD TRADE PARASWAP HERE
     if (_type == uint(ExchangeType.Paraswap)) {
-      // convert bytes arrays to address and uint
-      address[] memory callees = getAddressArrayFromBytes32(_additionalArgs[1]);
-      uint256[] memory startIndexes = getUintArrayFromBytes32(_additionalArgs[3]);
-      uint256[] memory values = getUintArrayFromBytes32(_additionalArgs[4])
-
-      // call paraswap 
+      // call paraswap
       receivedAmount = _tradeViaParaswap(
           _source,
           _destination,
           _sourceAmount,
           uint256(_additionalArgs[0]),  // minDestinationAmount,
-          callees, // callees,
-          bytes(_additionalArgs[2]), // memory exchangeData,
-          startIndexes, // memory startIndexes,
-          values, // memory values,
-          uint256 _additionalArgs[5] // mintPrice
-      )
+          getAddressArrayFromBytes32(_additionalArgs[1]), // callees,
+          FromBytes32.bytes32ToBytes(_additionalArgs[2]), // memory exchangeData,
+          getUintArrayFromBytes32(_additionalArgs[3]), // memory startIndexes,
+          getUintArrayFromBytes32(_additionalArgs[4]), // memory values,
+          uint256(_additionalArgs[5]) // mintPrice
+      );
     } else {
       // unknown exchange type
       revert();
@@ -148,10 +143,10 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
    returns (uint256)
  {
 
-   if (_source == ETH_TOKEN_ADDRESS) {
-     destinationReceived = paraswapInterface.swap.value(_sourceAmount)(
-       address(sourceToken),
-       address(destinationToken),
+   if (ERC20(sourceToken) == ETH_TOKEN_ADDRESS) {
+     paraswapInterface.swap.value(sourceAmount)(
+       sourceToken,
+       destinationToken,
        sourceAmount,
        minDestinationAmount,
        callees,
@@ -161,10 +156,10 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
        mintPrice
      );
    } else {
-     _transferFromSenderAndApproveTo(_source, _sourceAmount, paraswap);
-     destinationReceived = paraswapInterface.swap(
-       address(sourceToken),
-       address(destinationToken),
+     _transferFromSenderAndApproveTo(ERC20(sourceToken), sourceAmount, paraswap);
+     paraswapInterface.swap(
+       sourceToken,
+       destinationToken,
        sourceAmount,
        minDestinationAmount,
        callees,
@@ -175,8 +170,8 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
      );
    }
 
-   uint256 destinationReceived = tokenBalance(destinationToken, address(this));
-   return destinationReceive;
+   uint256 destinationReceived = tokenBalance(ERC20(destinationToken));
+   return destinationReceived;
  }
 
  function tokenBalance(ERC20 _token) private view returns (uint256) {
@@ -217,7 +212,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
   // get best rate from paraswap
   function getValueFromParaswap(address _from, address _to, uint256 _amount) private view returns (uint256){
-    priceFeedInterface.OptimalRate memory price = priceFeedInterface.getBestPrice(fromToken, toToken, srcAmount);
+    IPriceFeed.OptimalRate memory price = priceFeedInterface.getBestPrice(_from, _to, _amount);
     return price.rate;
   }
 
@@ -251,19 +246,19 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   }
 
   // helpers
-  function getAddressArrayFromBytes32(bytes32[] _inputArray) private view returns(address[]){
-    address[] memory output;
-    for(uint i = 0; i<_additionalArgs[1].length; i++){
-      callees.push(addressFromBytes32.bytesToAddress(_inputArray[i]))
+  function getAddressArrayFromBytes32(bytes32 _inputArray) private view returns(address[]){
+    address[] storage output;
+    for(uint i = 0; i<_inputArray.length; i++){
+      output.push(FromBytes32.bytesToAddress(_inputArray[i]));
     }
 
     return output;
   }
 
-  function getUintArrayFromBytes32(bytes32[] _inputArray) private view returns(address[]){
-    address[] memory output;
-    for(uint i = 0; i<_additionalArgs[1].length; i++){
-      callees.push(uint256(_inputArray[i]))
+  function getUintArrayFromBytes32(bytes32 _inputArray) private view returns(uint256[]){
+    uint256[] storage output;
+    for(uint i = 0; i<_inputArray.length; i++){
+      output.push(uint256(_inputArray[i]));
     }
 
     return output;

@@ -12,5 +12,6 @@ contract ParaswapInterface{
      uint256[] memory values,
      uint256 mintPrice
    )
-   public;
+   public
+   payable;
 }
