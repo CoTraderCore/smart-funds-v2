@@ -90,10 +90,10 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
           _destination,
           _sourceAmount,
           uint256(_additionalArgs[0]),  // minDestinationAmount,
-          getAddressArrayFromBytes32(_additionalArgs[1]), // callees,
+          FromBytes32.getAddressArrayFromBytes32(_additionalArgs[1]), // callees,
           FromBytes32.bytes32ToBytes(_additionalArgs[2]), // memory exchangeData,
-          getUintArrayFromBytes32(_additionalArgs[3]), // memory startIndexes,
-          getUintArrayFromBytes32(_additionalArgs[4]), // memory values,
+          FromBytes32.getUintArrayFromBytes32(_additionalArgs[3]), // memory startIndexes,
+          FromBytes32.getUintArrayFromBytes32(_additionalArgs[4]), // memory values,
           uint256(_additionalArgs[5]) // mintPrice
       );
     } else {
@@ -243,25 +243,6 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   */
   function setToken(address _token, bool _enabled) external onlyOwner {
     disabledTokens[_token] = _enabled;
-  }
-
-  // helpers
-  function getAddressArrayFromBytes32(bytes32 _inputArray) private pure returns(address[]){
-    address[] memory output;
-    for(uint i = 0; i<_inputArray.length; i++){
-      output[i] = (FromBytes32.bytesToAddress(_inputArray[i]));
-    }
-
-    return output;
-  }
-
-  function getUintArrayFromBytes32(bytes32 _inputArray) private pure returns(uint256[]){
-    uint256[] memory output;
-    for(uint i = 0; i<_inputArray.length; i++){
-      output[i] = (uint256(_inputArray[i]));
-    }
-
-    return output;
   }
 
   // fallback payable function to receive ether from other contract addresses
