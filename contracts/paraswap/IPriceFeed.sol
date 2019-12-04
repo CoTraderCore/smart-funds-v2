@@ -18,3 +18,6 @@ interface IPriceFeed {
 
   function getBancorRelayer(address token) external view returns (address);
 }
+
+
+// Kovan: 0xe7B08b5ce1594653d7Bc8457c42FaE1385160823

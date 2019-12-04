@@ -202,17 +202,17 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   * @return The value of `_amount` amount of _from in terms of _to
   */
   function getValue(address _from, address _to, uint256 _amount) public view returns (uint256) {
-     // SHOULD GET VALUE FROM PARASWAP HERE
-     uint256 expectedRate = getValueFromParaswap(ERC20(_from), ERC20(_to), _amount);
+     uint256 expectedRate = getValueFromParaswap(_from, _to, _amount);
      uint256 value = expectedRate * _amount / (10 ** uint256(DetailedERC20(_from).decimals()));
 
     return value;
   }
 
-  // NOT FINISHED
-  // Should check token and return best price
+
+  // get best rate from paraswap
   function getValueFromParaswap(address _from, address _to, uint256 _amount) private view returns (uint256){
-    return priceFeedInterface.getBestPrice(_from, _to, _amount);
+    priceFeedInterface.OptimalRate memory price = priceFeedInterface.getBestPrice(fromToken, toToken, srcAmount);
+    return price.rate;
   }
 
   /**
