@@ -21,7 +21,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   enum ExchangeType { Paraswap }
 
   // Paraswap recognizes ETH by this address
-  ERC20 constant private ETH_TOKEN_ADDRESS = ERC20(0x00eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+  ERC20 constant private ETH_TOKEN_ADDRESS = ERC20(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
 
   mapping (address => bool) disabledTokens;
 
@@ -80,15 +80,14 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
       require(msg.value == 0);
     }
 
-    if (_type == uint(ExchangeType.Paraswap)) {
-
     // SHOULD TRADE PARASWAP HERE
+    if (_type == uint(ExchangeType.Paraswap)) {
     receivedAmount = _tradeViaParaswap(
       _source,
       _destination,
       _sourceAmount,
 
-      // TODO Function for correct converts from bytes
+      // TODO write function for correct converts from bytes
       uint256(_additionalArgs[0]),  // minDestinationAmount,
       address[] _additionalArgs[1], // memory callees,
       bytes _additionalArgs[2], // memory exchangeData,
@@ -145,8 +144,8 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
    if (_source == ETH_TOKEN_ADDRESS) {
      destinationReceived = paraswapInterface.swap.value(_sourceAmount)(
-       sourceToken,
-       destinationToken,
+       address(sourceToken),
+       address(destinationToken),
        sourceAmount,
        minDestinationAmount,
        callees,
@@ -158,8 +157,8 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
    } else {
      _transferFromSenderAndApproveTo(_source, _sourceAmount, paraswap);
      destinationReceived = paraswapInterface.swap(
-       sourceToken,
-       destinationToken,
+       address(sourceToken),
+       address(destinationToken),
        sourceAmount,
        minDestinationAmount,
        callees,
