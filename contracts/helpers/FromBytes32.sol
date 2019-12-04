@@ -38,7 +38,7 @@ function bytes32ToBytes(bytes32 data) internal pure returns (bytes) {
 
 
 // NOT TESTED THIS
-function getAddressArrayFromBytes32(bytes32 _inputArray) internal pure returns(address[]){
+function getAddressArrayFromBytes32(bytes32[] _inputArray) internal pure returns(address[]){
   address[] memory output;
   for(uint i = 0; i<_inputArray.length; i++){
     output[i] = bytesToAddress(_inputArray[i]);
@@ -48,7 +48,7 @@ function getAddressArrayFromBytes32(bytes32 _inputArray) internal pure returns(a
 }
 
 // NOT TESTED THIS
-function getUintArrayFromBytes32(bytes32 _inputArray) internal pure returns(uint256[]){
+function getUintArrayFromBytes32(bytes32[] _inputArray) internal pure returns(uint256[]){
   uint256[] memory output;
   for(uint i = 0; i<_inputArray.length; i++){
     output[i] = (uint256(_inputArray[i]));
