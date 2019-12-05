@@ -123,54 +123,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     return receivedAmount;
   }
 
-  // helper for convert paraswap params
-  function getParaswapParamsFromBytes32(bytes32[] _additionalArgs) private view returns
-  (
-    uint256 minDestinationAmount,
-    address[] memory callees,
-    bytes memory exchangeData,
-    uint256[] memory startIndexes,
-    uint256[] memory values,
-    uint256 mintPrice
-  )
-  {
-    // get not array data
-    minDestinationAmount = uint256(_additionalArgs[0]);
-    mintPrice = uint256(_additionalArgs[1]);
-    exchangeData = FromBytes32.bytes32ToBytes(_additionalArgs[2]);
-
-    // get arrays
-
-    // get callees
-    uint calleesLength = uint(_additionalArgs[3]);
-    uint i = 0;
-    uint j = 0;
-    uint totalLength = calleesLength;
-
-    for(i = totalLength; i < calleesLength; i++){
-      callees[j] = FromBytes32.bytesToAddress(_additionalArgs[i]);
-      j++;
-    }
-
-    // get startIndexes
-    j = 0;
-    totalLength = 4 + calleesLength;
-    uint startIndexesLength = uint(_additionalArgs[totalLength]);
-    for(i = totalLength; i < startIndexesLength; i++){
-      startIndexes[j] = uint256(_additionalArgs[i]);
-      j++;
-    }
-
-    // get values
-    totalLength = totalLength + startIndexesLength;
-    j = 0;
-    uint valuesLength = uint(_additionalArgs[totalLength]);
-    for(i = totalLength; i < valuesLength ; i++){
-      values[j] = uint256(_additionalArgs[i]);
-      j++;
-    }
-  }
-
+  // TODO AFTER TEST if all works move paraswap logic to separate proxy contract
   // Paraswap trade helper
   // TODO describe this
   function _tradeViaParaswap(
@@ -182,13 +135,12 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
    private
    returns (uint256)
  {
-   var (
-   minDestinationAmount,
-   callees,
-   exchangeData,
-   startIndexes,
-   values,
-   mintPrice) = getParaswapParamsFromBytes32(_additionalArgs);
+   (uint256 minDestinationAmount,
+    address[] memory callees,
+    bytes memory exchangeData,
+    uint256[] memory startIndexes,
+    uint256[] memory values,
+    uint256 mintPrice) = getParaswapParamsFromBytes32(_additionalArgs);
 
    if (ERC20(sourceToken) == ETH_TOKEN_ADDRESS) {
      paraswapInterface.swap.value(sourceAmount)(
@@ -219,6 +171,57 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
    uint256 destinationReceived = tokenBalance(ERC20(destinationToken));
    return destinationReceived;
+ }
+
+ // helper for convert paraswap params from bytes32 arrray
+ // TODO describe this
+ function getParaswapParamsFromBytes32(bytes32[] _additionalArgs) private view returns
+ (
+   uint256 minDestinationAmount,
+   address[] memory callees,
+   bytes memory exchangeData,
+   uint256[] memory startIndexes,
+   uint256[] memory values,
+   uint256 mintPrice
+ )
+ {
+   // get not arrays data
+   minDestinationAmount = uint256(_additionalArgs[0]);
+   mintPrice = uint256(_additionalArgs[1]);
+   exchangeData = FromBytes32.bytes32ToBytes(_additionalArgs[2]);
+
+
+   // create arrays
+   // 1 get callees arrays with addresses
+   uint calleesLength = uint(_additionalArgs[3]);
+   uint i = 0;
+   uint j = 0;
+   uint totalLength = 3;
+
+   for(i = totalLength; i < calleesLength; i++){
+     callees[j] = FromBytes32.bytesToAddress(_additionalArgs[i]);
+     j++;
+   }
+
+   // 2 get startIndexes array with uint256
+   j = 0;
+   totalLength = totalLength + calleesLength;
+
+   uint startIndexesLength = uint(_additionalArgs[totalLength]);
+   for(i = totalLength; i < startIndexesLength; i++){
+     startIndexes[j] = uint256(_additionalArgs[i]);
+     j++;
+   }
+
+   // 3 get values array with uin256
+   j = 0;
+   totalLength = totalLength + startIndexesLength;
+
+   uint valuesLength = uint(_additionalArgs[totalLength]);
+   for(i = totalLength; i < valuesLength ; i++){
+     values[j] = uint256(_additionalArgs[i]);
+     j++;
+   }
  }
 
  function tokenBalance(ERC20 _token) private view returns (uint256) {
