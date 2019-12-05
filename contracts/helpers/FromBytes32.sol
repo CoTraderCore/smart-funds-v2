@@ -2,25 +2,6 @@ pragma solidity ^0.4.24;
 
 library FromBytes32 {
 
-/**
-* @dev Allows convert address from bytes32
-*
-* @param _address   bytes32 address
-*/
-function bytesToAddress(bytes32 _address) internal pure returns (address) {
-    uint160 m = 0;
-    uint160 b = 0;
-
-    for (uint8 i = 0; i < 20; i++) {
-      m *= 256;
-      b = uint160(_address[i]);
-      m += (b);
-    }
-
-    return address(m);
-}
-
-
 // NOT TESTED THIS
 function bytes32ToBytes(bytes32 data) internal pure returns (bytes) {
     uint i = 0;

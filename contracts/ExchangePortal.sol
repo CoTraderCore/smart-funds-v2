@@ -199,7 +199,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
    uint totalLength = 3;
 
    for(i = totalLength; i < calleesLength; i++){
-     callees[j] = FromBytes32.bytesToAddress(_additionalArgs[i]);
+     callees[j] = address(_additionalArgs[i]);
      j++;
    }
 
