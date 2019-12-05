@@ -86,25 +86,12 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
     // SHOULD TRADE PARASWAP HERE
     if (_type == uint(ExchangeType.Paraswap)) {
-      var (
-      minDestinationAmount,
-      callees,
-      exchangeData,
-      tartIndexes,
-      values,
-      mintPrice) = getParaswapParamsFromBytes32(_additionalArgs);
-
       // call paraswap
       receivedAmount = _tradeViaParaswap(
           _source,
           _destination,
           _sourceAmount,
-          minDestinationAmount,
-          callees,
-          exchangeData,
-          tartIndexes,
-          values,
-          mintPrice
+          _additionalArgs
       );
     } else {
       // unknown exchange type
@@ -190,16 +177,18 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     address sourceToken,
     address destinationToken,
     uint256 sourceAmount,
-    uint256 minDestinationAmount,
-    address[] memory callees,
-    bytes memory exchangeData,
-    uint256[] memory startIndexes,
-    uint256[] memory values,
-    uint256 mintPrice
+    bytes32[] _additionalArgs
  )
    private
    returns (uint256)
  {
+   var (
+   minDestinationAmount,
+   callees,
+   exchangeData,
+   startIndexes,
+   values,
+   mintPrice) = getParaswapParamsFromBytes32(_additionalArgs);
 
    if (ERC20(sourceToken) == ETH_TOKEN_ADDRESS) {
      paraswapInterface.swap.value(sourceAmount)(
