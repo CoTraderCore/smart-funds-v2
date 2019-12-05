@@ -175,7 +175,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
  // helper for convert paraswap params from bytes32 arrray
  // TODO describe this
- function getParaswapParamsFromBytes32(bytes32[] _additionalArgs) private view returns
+ function getParaswapParamsFromBytes32(bytes32[] _additionalArgs) private pure returns
  (
    uint256 minDestinationAmount,
    address[] memory callees,
