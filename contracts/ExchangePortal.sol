@@ -142,7 +142,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     bytes memory exchangeData,
     uint256[] memory startIndexes,
     uint256[] memory values,
-    uint256 mintPrice) = paraswapParams.getParaswapParamsFromBytes32(_additionalArgs);
+    uint256 mintPrice) = paraswapParams.getParaswapParamsFromBytes32Array(_additionalArgs);
 
    if (ERC20(sourceToken) == ETH_TOKEN_ADDRESS) {
      paraswapInterface.swap.value(sourceAmount)(
