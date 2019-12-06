@@ -4,7 +4,7 @@ pragma solidity ^0.4.24;
 contract ParaswapParams {
 
   // TODO describe this
-  function getParaswapParamsFromBytes32Array(bytes32[] _additionalArgs) public pure returns
+  function getParaswapParamsFromBytes32Array(bytes32[] memory _additionalArgs) public pure returns
   (
     uint256 minDestinationAmount,
     address[] memory,
@@ -71,7 +71,7 @@ contract ParaswapParams {
     uint256[] memory values,
     uint256 mintPrice
   )
-  public pure returns(bytes32[9] _output){ // should always return fixed size array
+  public pure returns(bytes32[9] memory _output){ // should always return fixed size array
     _output[0] = bytes32(minDestinationAmount);
     _output[1] = bytes32(mintPrice);
     _output[2] = bytesToBytes32(exchangeData);
