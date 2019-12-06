@@ -1,4 +1,5 @@
 /* globals artifacts */
+const ParaswapParams = artifacts.require('./ParaswapParams.sol')
 const SmartFundRegistry = artifacts.require('./SmartFundRegistry.sol')
 const ExchangePortal = artifacts.require('./ExchangePortal.sol')
 const PoolPortal = artifacts.require('./PoolPortal.sol')
@@ -13,13 +14,15 @@ module.exports = (deployer, network, accounts) => {
     .then(() => deployer.deploy(ExchangePortal, PARASWAP_NETWORK_ADDRESS, PARASWAP_PRICE_ADDRESS))
     .then(() => deployer.deploy(PermittedExchanges, ExchangePortal.address))
     .then(() => deployer.deploy(PoolPortal))
+    .then(() => deployer.deploy(ParaswapParams))
     .then(() =>
       deployer.deploy(
         SmartFundRegistry,
         PLATFORM_FEE,
         ExchangePortal.address,
         PermittedExchanges.address,
-        PoolPortal.address
+        PoolPortal.address,
+        ParaswapParams.address
       )
     )
 }
