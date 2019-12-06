@@ -71,12 +71,19 @@ contract ParaswapParams {
     uint256[] memory values,
     uint256 mintPrice
   )
-  public pure returns(bytes32[10] memory _output){ // should always return fixed size array
+  public pure returns(bytes32[] memory){
+     // define output array size
+     uint arraySize = 6 + callees.length + startIndexes.length + values.length;
+     bytes32[] memory _output = new bytes32[](arraySize);
+
+     // convert to bytes single data
     _output[0] = bytes32(minDestinationAmount);
     _output[1] = bytes32(mintPrice);
     _output[2] = bytesToBytes32(exchangeData);
 
-    // Write callees
+    // convert to bytes arrays
+
+    // Write callees array
     _output[3] = bytes32(callees.length);
     uint totalLength = 3;
     uint i = totalLength;
@@ -86,7 +93,7 @@ contract ParaswapParams {
         _output[i] = bytes32(callees[j]);
     }
 
-    // Write startIndexes
+    // Write startIndexes array
     totalLength = totalLength + startIndexes.length;
     _output[totalLength] = bytes32(startIndexes.length);
     i = totalLength;
@@ -96,7 +103,7 @@ contract ParaswapParams {
         _output[i] = bytes32(startIndexes[j]);
     }
 
-    // Write values
+    // Write values array
     totalLength = totalLength + startIndexes.length;
     _output[totalLength] = bytes32(values.length);
     i = totalLength;
