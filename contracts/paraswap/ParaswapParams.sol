@@ -7,10 +7,10 @@ contract ParaswapParams {
   function getParaswapParamsFromBytes32Array(bytes32[] memory _additionalArgs) public pure returns
   (
     uint256 minDestinationAmount,
-    address[] memory,
+    address[] memory callees,
     bytes memory exchangeData,
-    uint256[] memory,
-    uint256[] memory,
+    uint256[] memory startIndexes,
+    uint256[] memory values,
     uint256 mintPrice
   )
   {
@@ -28,7 +28,7 @@ contract ParaswapParams {
     uint j = 0;
     uint totalLength = 3;
     // create fixed size array callees
-    address[] memory callees = new address[](calleesLength);
+    callees = new address[](calleesLength);
 
     for(i = totalLength; i < calleesLength; i++){
       callees[j] = address(_additionalArgs[i]);
@@ -41,7 +41,7 @@ contract ParaswapParams {
 
     uint startIndexesLength = uint(_additionalArgs[totalLength]);
     // create fixed size array startIndexes
-    uint256[] memory startIndexes = new uint256[](startIndexesLength);
+    startIndexes = new uint256[](startIndexesLength);
 
     for(i = totalLength; i < startIndexesLength; i++){
       startIndexes[j] = uint256(_additionalArgs[i]);
@@ -53,7 +53,7 @@ contract ParaswapParams {
     totalLength = totalLength + startIndexesLength;
     uint valuesLength = uint(_additionalArgs[totalLength]);
     // create fixed size array values
-    uint256[] memory values = new uint256[](valuesLength);
+    values = new uint256[](valuesLength);
 
     for(i = totalLength; i < valuesLength ; i++){
       values[j] = uint256(_additionalArgs[i]);
@@ -113,6 +113,7 @@ contract ParaswapParams {
         _output[i] = bytes32(values[j]);
     }
 
+    return _output;
   }
 
   // helper for converts bytes to bytes32
