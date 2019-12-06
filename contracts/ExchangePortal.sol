@@ -125,7 +125,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     return receivedAmount;
   }
 
-  // TODO AFTER TEST if all works move paraswap logic to separate proxy contract
+
   // Paraswap trade helper
   // TODO describe this
   function _tradeViaParaswap(

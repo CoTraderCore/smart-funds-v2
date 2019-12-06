@@ -64,7 +64,7 @@ contract ParaswapParams {
     uint256[] memory values,
     uint256 mintPrice
   )
-  public pure returns(bytes32[] _output){
+  public pure returns(bytes32[9] _output){ // should always return fixed size array 
     _output[0] = bytes32(minDestinationAmount);
     _output[1] = bytes32(mintPrice);
     _output[2] = bytesToBytes32(exchangeData);
