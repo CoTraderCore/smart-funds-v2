@@ -6,7 +6,6 @@ import "./ExchangePortalInterface.sol";
 import "./zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./zeppelin-solidity/contracts/math/SafeMath.sol";
 import "./zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
-import "./helpers/FromBytes32.sol";
 import "./paraswap/ParaswapInterface.sol";
 import "./paraswap/IPriceFeed.sol";
 
@@ -16,7 +15,6 @@ import "./paraswap/IPriceFeed.sol";
 */
 contract ExchangePortal is ExchangePortalInterface, Ownable {
   using SafeMath for uint256;
-  using FromBytes32 for bytes32;
 
   ParaswapInterface public paraswapInterface;
   IPriceFeed public priceFeedInterface;
@@ -188,7 +186,8 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
    // get not arrays data
    minDestinationAmount = uint256(_additionalArgs[0]);
    mintPrice = uint256(_additionalArgs[1]);
-   exchangeData = FromBytes32.bytes32ToBytes(_additionalArgs[2]);
+   // convert bytes32 to bytes 
+   exchangeData = abi.encodePacked(_additionalArgs[2]);
 
 
    // create arrays
