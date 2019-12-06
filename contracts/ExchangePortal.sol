@@ -8,6 +8,7 @@ import "./zeppelin-solidity/contracts/math/SafeMath.sol";
 import "./zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
 import "./paraswap/ParaswapInterface.sol";
 import "./paraswap/IPriceFeed.sol";
+import "./paraswap/IParaswapParams.sol";
 
 /*
 * The ExchangePortal contract is an implementation of ExchangePortalInterface that allows
@@ -18,6 +19,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
   ParaswapInterface public paraswapInterface;
   IPriceFeed public priceFeedInterface;
+  IParaswapParams public paraswapParams;
   address public paraswap;
 
   enum ExchangeType { Paraswap }
@@ -40,11 +42,13 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   *
   * @param _paraswap        paraswap main address
   * @param _paraswapPrice   paraswap price feed address
+  * @param _paraswapParams  helper contract for convert params from bytes32
   */
-  constructor(address _paraswap, address _paraswapPrice) public {
+  constructor(address _paraswap, address _paraswapPrice, address _paraswapParams) public {
     paraswapInterface = ParaswapInterface(_paraswap);
     priceFeedInterface = IPriceFeed(_paraswapPrice);
     paraswap = _paraswap;
+    paraswapParams = IParaswapParams(_paraswapParams);
   }
 
 
@@ -138,7 +142,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     bytes memory exchangeData,
     uint256[] memory startIndexes,
     uint256[] memory values,
-    uint256 mintPrice) = getParaswapParamsFromBytes32(_additionalArgs);
+    uint256 mintPrice) = paraswapParams.getParaswapParamsFromBytes32(_additionalArgs);
 
    if (ERC20(sourceToken) == ETH_TOKEN_ADDRESS) {
      paraswapInterface.swap.value(sourceAmount)(
@@ -169,58 +173,6 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
    uint256 destinationReceived = tokenBalance(ERC20(destinationToken));
    return destinationReceived;
- }
-
- // helper for convert paraswap params from bytes32 arrray
- // TODO describe this
- function getParaswapParamsFromBytes32(bytes32[] _additionalArgs) private pure returns
- (
-   uint256 minDestinationAmount,
-   address[] memory callees,
-   bytes memory exchangeData,
-   uint256[] memory startIndexes,
-   uint256[] memory values,
-   uint256 mintPrice
- )
- {
-   // get not arrays data
-   minDestinationAmount = uint256(_additionalArgs[0]);
-   mintPrice = uint256(_additionalArgs[1]);
-   // convert bytes32 to bytes 
-   exchangeData = abi.encodePacked(_additionalArgs[2]);
-
-
-   // create arrays
-   // 1 get callees arrays with addresses
-   uint calleesLength = uint(_additionalArgs[3]);
-   uint i = 0;
-   uint j = 0;
-   uint totalLength = 3;
-
-   for(i = totalLength; i < calleesLength; i++){
-     callees[j] = address(_additionalArgs[i]);
-     j++;
-   }
-
-   // 2 get startIndexes array with uint256
-   j = 0;
-   totalLength = totalLength + calleesLength;
-
-   uint startIndexesLength = uint(_additionalArgs[totalLength]);
-   for(i = totalLength; i < startIndexesLength; i++){
-     startIndexes[j] = uint256(_additionalArgs[i]);
-     j++;
-   }
-
-   // 3 get values array with uin256
-   j = 0;
-   totalLength = totalLength + startIndexesLength;
-
-   uint valuesLength = uint(_additionalArgs[totalLength]);
-   for(i = totalLength; i < valuesLength ; i++){
-     values[j] = uint256(_additionalArgs[i]);
-     j++;
-   }
  }
 
  function tokenBalance(ERC20 _token) private view returns (uint256) {
