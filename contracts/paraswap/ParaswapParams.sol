@@ -3,8 +3,10 @@ pragma solidity ^0.4.24;
 
 contract ParaswapParams {
 
+  // UNPACK DATA from bytes32 ARRAY
   // TODO describe this
-  function getParaswapParamsFromBytes32Array(bytes32[] memory _additionalArgs) public pure returns
+  function getParaswapParamsFromBytes32Array(bytes32[] memory _additionalArgs)
+  public pure returns
   (
     uint256 minDestinationAmount,
     address[] memory callees,
@@ -14,54 +16,79 @@ contract ParaswapParams {
     uint256 mintPrice
   )
   {
-    // get not arrays data
+    // START convert single data from bytes32
     minDestinationAmount = uint256(_additionalArgs[0]);
     mintPrice = uint256(_additionalArgs[1]);
     // convert bytes32 to bytes
     exchangeData = abi.encodePacked(_additionalArgs[2]);
+    // END convert single data from bytes32
 
-    // create arrays from bytes32[] items
 
-    // get callees arrays with addresses
-    uint calleesLength = uint(_additionalArgs[3]);
-    uint i = 0;
-    uint j = 0;
+    // START create arrays from converted bytes32 items
+
+    // length of input bytes32 array
     uint totalLength = 3;
-    // create fixed size array callees
-    callees = new address[](calleesLength);
 
-    for(i = totalLength; i < calleesLength; i++){
+    // Start create callees arrays with address data
+
+    // create fixed size array callees
+    uint calleesLength = uint(_additionalArgs[3]);
+    callees = new address[](calleesLength);
+    totalLength = totalLength + 1;
+
+    // indexes for input array and currect array
+    uint i = totalLength;
+    uint j = 0;
+
+    // convert address from bytes and write to callees array
+    for(i = totalLength; i < totalLength + calleesLength; i++){
       callees[j] = address(_additionalArgs[i]);
       j++;
     }
+    // End create callees arrays
 
-    // get startIndexes array with uint256
+
+    // Start create startIndexes array with uint256 data
+
+    // update indexes
     j = 0;
     totalLength = totalLength + calleesLength;
 
-    uint startIndexesLength = uint(_additionalArgs[totalLength]);
     // create fixed size array startIndexes
+    // TODO: debug this index
+    uint startIndexesLength = uint(_additionalArgs[totalLength]);
     startIndexes = new uint256[](startIndexesLength);
 
-    for(i = totalLength; i < startIndexesLength; i++){
+    // convert data from bytes32 to uint256 and write to startIndexes array
+    for(i = totalLength; i < totalLength + startIndexesLength; i++){
       startIndexes[j] = uint256(_additionalArgs[i]);
       j++;
     }
+    // End create startIndexes array
 
-    // get values array with uin256
+
+    // Start create values array with uin256 data
+
+    // update indexes
     j = 0;
     totalLength = totalLength + startIndexesLength;
-    uint valuesLength = uint(_additionalArgs[totalLength]);
+
     // create fixed size array values
+    uint valuesLength = uint(_additionalArgs[totalLength]);
     values = new uint256[](valuesLength);
 
-    for(i = totalLength; i < valuesLength ; i++){
+    // convert data from bytes32 to uint256 and write to values array
+    for(i = totalLength; i < totalLength + valuesLength ; i++){
       values[j] = uint256(_additionalArgs[i]);
       j++;
     }
+    // End create values array
+
+    // END create arrays from bytes32 items
   }
 
 
+  // PACK DATA IN BYTES32 array
   // TODO describe this
   function convertParaswapParamsToBytes32Array(
     uint256 minDestinationAmount,
@@ -88,7 +115,7 @@ contract ParaswapParams {
     // length for _output array
     uint totalLength = 3;
 
-    // START convert callees array to bytes32
+    // Start convert callees array to bytes32
     // convert and write callees array length to bytes32
     _output[totalLength] = bytes32(callees.length);
 
@@ -102,10 +129,10 @@ contract ParaswapParams {
         _output[i] = bytes32(callees[j]);
         j++;
     }
-    // END convert callees array to bytes32
+    // End convert callees array to bytes32
 
 
-    // START convert startIndexes array to bytes32
+    // Start convert startIndexes array to bytes32
     totalLength = totalLength + callees.length;
     // convert and write startIndexes array length
     _output[totalLength] = bytes32(startIndexes.length);
@@ -120,9 +147,9 @@ contract ParaswapParams {
         _output[i] = bytes32(startIndexes[j]);
         j++;
     }
-    // END convert startIndexes array to bytes32
+    // End convert startIndexes array to bytes32
 
-    // START convert values array to bytes32
+    // Start convert values array to bytes32
     // Write values array
     totalLength = totalLength + startIndexes.length;
     // convert and write values length
@@ -138,13 +165,14 @@ contract ParaswapParams {
         _output[i] = bytes32(values[j]);
         j++;
     }
-    // END convert values array to bytes32
+    // End convert values array to bytes32
 
     // END convert to bytes arrays and write result to output
   }
 
 
 
+  // BUG CAN BE HERE
   // helper for converts bytes to bytes32
   function bytesToBytes32(bytes memory source) private pure returns (bytes32 result) {
     if (source.length == 0) {
