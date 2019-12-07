@@ -71,50 +71,79 @@ contract ParaswapParams {
     uint256[] memory values,
     uint256 mintPrice
   )
-  public pure returns(bytes32[] memory){
-     // define output array size
+  public pure returns(bytes32[] memory _output){
+     // define fixed size output array
      uint arraySize = 6 + callees.length + startIndexes.length + values.length;
-     bytes32[] memory _output = new bytes32[](arraySize);
+     _output = new bytes32[](arraySize);
 
-     // convert to bytes single data
+     // START convert to bytes32 single data and write result to output
     _output[0] = bytes32(minDestinationAmount);
     _output[1] = bytes32(mintPrice);
     _output[2] = bytesToBytes32(exchangeData);
+     // END convert to bytes32 single data and write result to output
 
-    // convert to bytes arrays
 
-    // Write callees array
-    _output[3] = bytes32(callees.length);
+    // START convert arrays to bytes32 and write result to output
+
+    // length for _output array
     uint totalLength = 3;
+
+    // START convert callees array to bytes32
+    // convert and write callees array length to bytes32
+    _output[totalLength] = bytes32(callees.length);
+
+    // create and update indexes
+    totalLength = totalLength + 1;
     uint i = totalLength;
     uint j = 0;
 
+    // convert and write callees items to bytes32
     for(i; i < totalLength + callees.length; i++){
         _output[i] = bytes32(callees[j]);
+        j++;
     }
+    // END convert callees array to bytes32
 
-    // Write startIndexes array
-    totalLength = totalLength + startIndexes.length;
+
+    // START convert startIndexes array to bytes32
+    totalLength = totalLength + callees.length;
+    // convert and write startIndexes array length
     _output[totalLength] = bytes32(startIndexes.length);
+
+    // update indexes
+    totalLength = totalLength + 1;
     i = totalLength;
     j = 0;
 
+    // convert and write startIndexes items
     for(i; i < totalLength + startIndexes.length; i++){
         _output[i] = bytes32(startIndexes[j]);
+        j++;
     }
+    // END convert startIndexes array to bytes32
 
+    // START convert values array to bytes32
     // Write values array
     totalLength = totalLength + startIndexes.length;
+    // convert and write values length
     _output[totalLength] = bytes32(values.length);
+
+    // update indexes
+    totalLength = totalLength + 1;
     i = totalLength;
     j = 0;
 
+    // convert and write values array items
     for(i; i < totalLength + values.length; i++){
         _output[i] = bytes32(values[j]);
+        j++;
     }
+    // END convert values array to bytes32
 
-    return _output;
+    // END convert to bytes arrays and write result to output
   }
+
+
 
   // helper for converts bytes to bytes32
   function bytesToBytes32(bytes memory source) private pure returns (bytes32 result) {
