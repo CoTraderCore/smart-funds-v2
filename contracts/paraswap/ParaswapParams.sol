@@ -74,7 +74,7 @@ contract ParaswapParams {
     totalLength = totalLength + startIndexesLength;
 
     // create fixed size array values
-    uint valuesLength = uint(_additionalArgs[totalLength]);
+    uint valuesLength = uint(_additionalArgs[totalLength]); // BUG HERE need check totalLength
     values = new uint256[](valuesLength);
 
     // convert data from bytes32 to uint256 and write to values array
