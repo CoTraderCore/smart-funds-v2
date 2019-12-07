@@ -55,9 +55,9 @@ contract ParaswapParams {
     totalLength = totalLength + calleesLength;
 
     // create fixed size array startIndexes
-    // TODO: debug this index
     uint startIndexesLength = uint(_additionalArgs[totalLength]);
     startIndexes = new uint256[](startIndexesLength);
+    // update next index
     totalLength = totalLength + 1;
 
     // convert data from bytes32 to uint256 and write to startIndexes array
@@ -77,6 +77,8 @@ contract ParaswapParams {
     // create fixed size array values
     uint valuesLength = uint(_additionalArgs[totalLength]);
     values = new uint256[](valuesLength);
+    // update next index
+    totalLength = totalLength + 1;
 
     // convert data from bytes32 to uint256 and write to values array
     for(i = totalLength; i < totalLength + valuesLength ; i++){
