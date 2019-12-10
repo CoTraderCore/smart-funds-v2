@@ -185,13 +185,13 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
     for (uint256 i = 1; i < tokenAddresses.length; i++) {
       // Transfer that _mul/_div of each token we hold to the user
       ERC20 token = ERC20(tokenAddresses[i]);
-      uint256 fundAmount = token.balanceOf(this);
+      uint256 fundAmount = token.balanceOf(address(this));
       uint256 payoutAmount = fundAmount.mul(_mul).div(_div);
 
       token.transfer(_withdrawAddress, payoutAmount);
     }
     // Transfer ether to _withdrawAddress
-    uint256 etherPayoutAmount = (this.balance).mul(_mul).div(_div);
+    uint256 etherPayoutAmount = (address(this).balance).mul(_mul).div(_div);
     _withdrawAddress.transfer(etherPayoutAmount);
   }
 
@@ -256,7 +256,7 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
 
     if (_source == ETH_TOKEN_ADDRESS) {
       // Make sure fund contains enough ether
-      require(this.balance >= _sourceAmount);
+      require(address(this).balance >= _sourceAmount);
       // Call trade on ExchangePortal along with ether
       receivedAmount = exchangePortal.trade.value(_sourceAmount)(
         _source,
@@ -317,7 +317,7 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   * @return The current total fund value
   */
   function calculateFundValue() public view returns (uint256) {
-    uint256 ethBalance = this.balance;
+    uint256 ethBalance = address(this).balance;
 
     // If the fund only contains ether, return the funds ether balance
     if (tokenAddresses.length == 1)
@@ -329,7 +329,7 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
 
     for (uint256 i = 1; i < tokenAddresses.length; i++) {
       fromAddresses[i-1] = tokenAddresses[i];
-      amounts[i-1] = ERC20(tokenAddresses[i]).balanceOf(this);
+      amounts[i-1] = ERC20(tokenAddresses[i]).balanceOf(address(this));
     }
 
     // Ask the Exchange Portal for the value of all the funds tokens in eth
@@ -344,8 +344,8 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
 
   function getTokenValue(ERC20 _token) public view returns (uint256) {
     if (_token == ETH_TOKEN_ADDRESS)
-      return this.balance;
-    uint256 tokenBalance = _token.balanceOf(this);
+      return address(this).balance;
+    uint256 tokenBalance = _token.balanceOf(address(this));
 
     return exchangePortal.getValue(_token, ETH_TOKEN_ADDRESS, tokenBalance);
   }
@@ -375,7 +375,7 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   */
   function removeToken(address _token, uint256 _tokenIndex) public onlyOwner {
     require(tokensTraded[_token]);
-    require(ERC20(_token).balanceOf(this) == 0);
+    require(ERC20(_token).balanceOf(address(this)) == 0);
     require(tokenAddresses[_tokenIndex] == _token);
 
     tokensTraded[_token] = false;
@@ -482,8 +482,8 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   // This method was added to easily record the funds token balances, may (should?) be removed in the future
   function getFundTokenHolding(ERC20 _token) external view returns (uint256) {
     if (_token == ETH_TOKEN_ADDRESS)
-      return this.balance;
-    return _token.balanceOf(this);
+      return address(this).balance;
+    return _token.balanceOf(address(this));
   }
 
   /**
@@ -528,9 +528,9 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   function emergencyWithdraw(address _token) external onlyOwner {
     require(totalShares == 0);
     if (_token == address(ETH_TOKEN_ADDRESS)) {
-      msg.sender.transfer(this.balance);
+      msg.sender.transfer(address(this).balance);
     } else {
-      ERC20(_token).transfer(msg.sender, ERC20(_token).balanceOf(this));
+      ERC20(_token).transfer(msg.sender, ERC20(_token).balanceOf(address(this)));
     }
   }
 

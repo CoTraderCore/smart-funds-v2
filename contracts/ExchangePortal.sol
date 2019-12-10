@@ -110,7 +110,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     }
 
     // After the trade, any _source that exchangePortal holds will be sent back to msg.sender
-    uint256 endAmount = (_source == ETH_TOKEN_ADDRESS) ? address(this).balance : _source.balanceOf(this);
+    uint256 endAmount = (_source == ETH_TOKEN_ADDRESS) ? address(this).balance : _source.balanceOf(address(this));
 
     // Check if we hold a positive amount of _source
     if (endAmount > 0) {
@@ -177,7 +177,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
  function tokenBalance(ERC20 _token) private view returns (uint256) {
    if (_token == ETH_TOKEN_ADDRESS)
      return address(this).balance;
-   return _token.balanceOf(this);
+   return _token.balanceOf(address(this));
  }
 
   /**
@@ -188,7 +188,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   * @param _to              Address to approve to
   */
   function _transferFromSenderAndApproveTo(ERC20 _source, uint256 _sourceAmount, address _to) private {
-    require(_source.transferFrom(msg.sender, this, _sourceAmount));
+    require(_source.transferFrom(msg.sender, address(this), _sourceAmount));
 
     _source.approve(_to, _sourceAmount);
   }
