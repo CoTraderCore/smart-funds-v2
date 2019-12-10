@@ -10,7 +10,6 @@ contract ParaswapParams {
   (
     uint256 minDestinationAmount,
     address[] memory callees,
-    bytes memory exchangeData,
     uint256[] memory startIndexes,
     uint256[] memory values,
     uint256 mintPrice
@@ -19,20 +18,18 @@ contract ParaswapParams {
     // START convert single data from bytes32
     minDestinationAmount = uint256(_additionalArgs[0]);
     mintPrice = uint256(_additionalArgs[1]);
-    // convert bytes32 to bytes
-    exchangeData = abi.encodePacked(_additionalArgs[2]);
     // END convert single data from bytes32
 
 
     // START create arrays from converted bytes32 items
 
     // length of input bytes32 array
-    uint totalLength = 3;
+    uint totalLength = 2;
 
     // Start create callees arrays with address data
 
     // create fixed size array callees
-    uint calleesLength = uint(_additionalArgs[3]);
+    uint calleesLength = uint(_additionalArgs[2]);
     callees = new address[](calleesLength);
     totalLength = totalLength + 1;
 
@@ -96,27 +93,25 @@ contract ParaswapParams {
   function convertParaswapParamsToBytes32Array(
     uint256 minDestinationAmount,
     address[] memory callees,
-    bytes memory exchangeData,
     uint256[] memory startIndexes,
     uint256[] memory values,
     uint256 mintPrice
   )
   public pure returns(bytes32[] memory _output){
      // define fixed size output array
-     uint arraySize = 6 + callees.length + startIndexes.length + values.length;
+     uint arraySize = 5 + callees.length + startIndexes.length + values.length;
      _output = new bytes32[](arraySize);
 
      // START convert to bytes32 single data and write result to output
     _output[0] = bytes32(minDestinationAmount);
     _output[1] = bytes32(mintPrice);
-    _output[2] = bytesToBytes32(exchangeData);
      // END convert to bytes32 single data and write result to output
 
 
     // START convert arrays to bytes32 and write result to output
 
     // length for _output array
-    uint totalLength = 3;
+    uint totalLength = 2;
 
     // Start convert callees array to bytes32
     // convert and write callees array length to bytes32
@@ -171,18 +166,5 @@ contract ParaswapParams {
     // End convert values array to bytes32
 
     // END convert to bytes arrays and write result to output
-  }
-
-
-
-  // BUG CAN BE HERE
-  // helper for converts bytes to bytes32
-  function bytesToBytes32(bytes memory source) private pure returns (bytes32 result) {
-    if (source.length == 0) {
-        return 0x0;
-    }
-    assembly {
-        result := mload(add(source, 32))
-    }
   }
 }
