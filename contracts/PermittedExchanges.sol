@@ -11,17 +11,17 @@ import "./zeppelin-solidity/contracts/ownership/Ownable.sol";
   with a 3 day timeout as well, in order to be publicly accountable and transparent.
 */
 contract PermittedExchanges is PermittedExchangesInterface, Ownable {
-  
+
   event NewExchangePending(address newExchange, uint256 permittedDate);
 
   event NewExchangeEnabled(address newExchange, bool enabled);
-  
+
   event NewWaitTimePending(uint256 newWaitTime, uint256 permittedDate);
-  
+
   event NewWaitTimeSet(uint256 newWaitTime);
 
   // The amount of waiting time for a new Exchange Portal to be permitted
-  uint256 public newExchangeWaitTime = 3 days;
+  uint256 public newExchangeWaitTime = 1 days;
 
   // New waiting time for new exchange portal to be permitted
   uint256 public newWaitTime;
@@ -57,10 +57,10 @@ contract PermittedExchanges is PermittedExchangesInterface, Ownable {
     require(exchangePermittedDate[_newAddress] == 0);
 
     // Set the permitted date to be newExchangeWaitTime from now
-    // solium-disable-next-line security/no-block-members    
+    // solium-disable-next-line security/no-block-members
     exchangePermittedDate[_newAddress] = now + newExchangeWaitTime;
 
-    // solium-disable-next-line security/no-block-members    
+    // solium-disable-next-line security/no-block-members
     emit NewExchangePending(_newAddress, now + newExchangeWaitTime);
   }
 
@@ -71,7 +71,7 @@ contract PermittedExchanges is PermittedExchangesInterface, Ownable {
   */
   function completeNewExchangeProcess(address _newAddress) public onlyOwner {
     // Check that the required amount of time has passed
-    // solium-disable-next-line security/no-block-members    
+    // solium-disable-next-line security/no-block-members
     require(exchangePermittedDate[_newAddress] > now);
 
     // Set the exchange as permitted
@@ -85,14 +85,14 @@ contract PermittedExchanges is PermittedExchangesInterface, Ownable {
   */
   function startNewWaitTimeProcess(uint256 _waitTime) public onlyOwner {
     // Setting the new time upgrade date to be newExchangeWaitTime from now
-    // solium-disable-next-line security/no-block-members    
+    // solium-disable-next-line security/no-block-members
     newWaitTimeUpgradeDate = now + newExchangeWaitTime;
 
     settingNewWaitTime = true;
 
     newWaitTime = _waitTime;
 
-    // solium-disable-next-line security/no-block-members    
+    // solium-disable-next-line security/no-block-members
     emit NewWaitTimePending(_waitTime, now + newExchangeWaitTime);
   }
 
@@ -102,9 +102,9 @@ contract PermittedExchanges is PermittedExchangesInterface, Ownable {
   function completeNewWaitTimeProcess() public onlyOwner {
     // Make sure that we're in the process of updating the pending period
     require(settingNewWaitTime);
-    
+
     // Check that the required amount of time has passed
-    // solium-disable-next-line security/no-block-members    
+    // solium-disable-next-line security/no-block-members
     require(now > newWaitTimeUpgradeDate);
 
     // Setting the new exchange pending time to the new one
@@ -135,6 +135,6 @@ contract PermittedExchanges is PermittedExchangesInterface, Ownable {
   function _enableAddress(address _newAddress, bool _enabled) private {
     permittedAddresses[_newAddress] = _enabled;
 
-    emit NewExchangeEnabled(_newAddress, _enabled);    
+    emit NewExchangeEnabled(_newAddress, _enabled);
   }
 }

@@ -1,10 +1,18 @@
 pragma solidity ^0.4.24;
-// helper contract for convert paraswap params from bytes32 arrray on contract side and to bytes32 on client side
+
+/**
+* This contract we use as helper for convert paraswap params from bytes32
+* arrray on contract side and to bytes32 array on client side
+*/
 
 contract ParaswapParams {
-
-  // UNPACK DATA from bytes32 ARRAY
-  // TODO describe this
+  /**
+  * @dev UNPACK DATA from bytes32 array
+  *
+  * @param _additionalArgs   array with paraswap params
+  *
+  * @return converted from bytes32 paraswap additional params
+  */
   function getParaswapParamsFromBytes32Array(bytes32[] memory _additionalArgs)
   public pure returns
   (
@@ -88,8 +96,17 @@ contract ParaswapParams {
   }
 
 
-  // PACK DATA IN BYTES32 array
-  // TODO describe this
+  /**
+  * @dev PACK DATA into bytes32 array
+  *
+  * @param minDestinationAmount  minimu destination token amount expected out of this swap
+  * @param callees               address of the external callee. This will also contain address of exchanges
+  * @param startIndexes          start index of calldata in above data structure for each callee
+  * @param values                amount of ethers to be sent in external call to each callee
+  * @param mintPrice             price of gas at the time of minting of gas tokens, if any. In wei
+  *
+  * @return converted bytes32 array
+  */
   function convertParaswapParamsToBytes32Array(
     uint256 minDestinationAmount,
     address[] memory callees,

@@ -1,5 +1,3 @@
-// NOT WORKED YET
-
 pragma solidity ^0.4.24;
 
 import "./ExchangePortalInterface.sol";
@@ -12,7 +10,7 @@ import "./paraswap/IParaswapParams.sol";
 
 /*
 * The ExchangePortal contract is an implementation of ExchangePortalInterface that allows
-* SmartFunds to exchange and calculate their value via KyberNetwork
+* SmartFunds to exchange and calculate their value via Paraswap
 */
 contract ExchangePortal is ExchangePortalInterface, Ownable {
   using SafeMath for uint256;
@@ -129,8 +127,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   }
 
 
-  // Paraswap trade helper
-  // TODO describe this
+  // Facilitates trade with Paraswap
   function _tradeViaParaswap(
     address sourceToken,
     address destinationToken,
