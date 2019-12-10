@@ -59,7 +59,8 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   * @param _sourceAmount      Amount to convert from (in _source token)
   * @param _destination       ERC20 token to convert to
   * @param _type              The type of exchange to trade with (For now 0 - because only paraswap)
-  * @param _additionalArgs    Array of bytes32 additional arguments
+  * @param _additionalArgs    Array of bytes32 additional arguments (For fixed size items and for different types items in array )
+  * @param _additionalData    For any size data (if not used set just 0x0)
   *
   * @return The amount of _destination received from the trade
   */
@@ -68,7 +69,8 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     uint256 _sourceAmount,
     ERC20 _destination,
     uint256 _type,
-    bytes32[] _additionalArgs
+    bytes32[] _additionalArgs,
+    bytes _additionalData
   )
     external
     payable
@@ -93,6 +95,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
           _source,
           _destination,
           _sourceAmount,
+          _additionalData,
           _additionalArgs
       );
     } else {
@@ -132,6 +135,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     address sourceToken,
     address destinationToken,
     uint256 sourceAmount,
+    bytes   exchangeData,
     bytes32[] _additionalArgs
  )
    private
@@ -139,7 +143,6 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
  {
    (uint256 minDestinationAmount,
     address[] memory callees,
-    bytes memory exchangeData,
     uint256[] memory startIndexes,
     uint256[] memory values,
     uint256 mintPrice) = paraswapParams.getParaswapParamsFromBytes32Array(_additionalArgs);

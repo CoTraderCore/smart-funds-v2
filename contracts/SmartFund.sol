@@ -14,7 +14,7 @@ import "./SmartFundInterface.sol";
   the fund owners ability to connect to a potentially malicious contract. In order for a new
   exchange portal to be added to PermittedExchanges, a 3 day timeout must pass, in which time
   the public may audit the new contract code to be assured that the new exchange portal does
-  not allow the manager to act maliciously with the funds holdings. 
+  not allow the manager to act maliciously with the funds holdings.
 */
 contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   using SafeMath for uint256;
@@ -31,13 +31,13 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
 
   // The maximum amount of tokens that can be traded via the smart fund
   uint256 public MAX_TOKENS = 50;
-  
+
   // Percentages are rounded to 3 decimal places
   uint256 public TOTAL_PERCENTAGE = 10000;
 
   // Address of the platform that takes a cut from the fund manager success cut
   address public platformAddress;
-  
+
   // the total number of shares in the fund
   uint256 public totalShares = 0;
 
@@ -157,7 +157,7 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
 
     // Calculate number of shares
     uint256 shares = calculateDepositToShares(msg.value);
-    
+
     // If user would receive 0 shares, don't continue with deposit
     require(shares != 0);
 
@@ -177,9 +177,9 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   /**
   * @dev Sends (_mul/_div) of every token (and ether) the funds holds to _withdrawAddress
   *
-  * @param _mul                The numerator 
+  * @param _mul                The numerator
   * @param _div                The denominator
-  * @param _withdrawAddress    Address to send the tokens/ether to    
+  * @param _withdrawAddress    Address to send the tokens/ether to
   */
   function _withdraw(uint256 _mul, uint256 _div, address _withdrawAddress) private returns (uint256) {
     for (uint256 i = 1; i < tokenAddresses.length; i++) {
@@ -187,7 +187,7 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
       ERC20 token = ERC20(tokenAddresses[i]);
       uint256 fundAmount = token.balanceOf(this);
       uint256 payoutAmount = fundAmount.mul(_mul).div(_div);
-      
+
       token.transfer(_withdrawAddress, payoutAmount);
     }
     // Transfer ether to _withdrawAddress
@@ -241,13 +241,15 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   * @param _destination       ERC20 token to convert to
   * @param _type              The type of exchange to trade with
   * @param _additionalArgs    Array of bytes32 additional arguments
+  * @param _additionalData    For any size data (if not used set just 0x0)
   */
   function trade(
     ERC20 _source,
     uint256 _sourceAmount,
     ERC20 _destination,
     uint256 _type,
-    bytes32[] _additionalArgs
+    bytes32[] _additionalArgs,
+    bytes _additionalData
   ) external onlyOwner {
 
     uint256 receivedAmount;
@@ -261,7 +263,8 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
         _sourceAmount,
         _destination,
         _type,
-        _additionalArgs
+        _additionalArgs,
+        _additionalData
       );
     } else {
       _source.approve(exchangePortal, _sourceAmount);
@@ -270,7 +273,8 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
         _sourceAmount,
         _destination,
         _type,
-        _additionalArgs
+        _additionalArgs,
+        _additionalData
       );
     }
 
@@ -289,8 +293,8 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   */
   function calculateDepositToShares(uint256 _amount) public view returns (uint256) {
     uint256 fundManagerCut;
-    uint256 fundValue;    
-    
+    uint256 fundValue;
+
     // If there are no shares in the contract, whoever deposits owns 100% of the fund
     // we will set this to 10^18 shares, but this could be any amount
     if (totalShares == 0)
@@ -302,9 +306,9 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
 
     if (fundValueBeforeDeposit == 0)
       return 0;
-    
+
     return _amount.mul(totalShares).div(fundValueBeforeDeposit);
-    
+
   }
 
   /**
@@ -314,15 +318,15 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   */
   function calculateFundValue() public view returns (uint256) {
     uint256 ethBalance = this.balance;
-    
+
     // If the fund only contains ether, return the funds ether balance
     if (tokenAddresses.length == 1)
       return ethBalance;
-    
+
     // Otherwise, we get the value of all the other tokens in ether via exchangePortal
     address[] memory fromAddresses = new address[](tokenAddresses.length - 1);
     uint256[] memory amounts = new uint256[](tokenAddresses.length - 1);
-    
+
     for (uint256 i = 1; i < tokenAddresses.length; i++) {
       fromAddresses[i-1] = tokenAddresses[i];
       amounts[i-1] = ERC20(tokenAddresses[i]).balanceOf(this);
@@ -363,7 +367,7 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   }
 
   /**
-  * @dev Removes a token from tokensTraded 
+  * @dev Removes a token from tokensTraded
   *
   * @param _token         The address of the token to be removed
   * @param _tokenIndex    The index of the token to be removed
@@ -424,10 +428,10 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
       fundManagerTotalCut = 0;
       fundManagerRemainingCut = 0;
     } else {
-      // calculate profit. profit = current fund value - total deposited + total withdrawn + total withdrawn by fm 
+      // calculate profit. profit = current fund value - total deposited + total withdrawn + total withdrawn by fm
       uint256 profit = uint256(int256(fundValue) - curTotalEtherDeposited);
       // remove the money already taken by the fund manager and take percentage
-      fundManagerTotalCut = profit.mul(successFee).div(TOTAL_PERCENTAGE);      
+      fundManagerTotalCut = profit.mul(successFee).div(TOTAL_PERCENTAGE);
       fundManagerRemainingCut = fundManagerTotalCut.sub(fundManagerCashedOut);
     }
   }
@@ -438,7 +442,7 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   function fundManagerWithdraw() public onlyOwner {
     uint256 fundManagerCut;
     uint256 fundValue;
-    
+
     (fundManagerCut, fundValue, ) = calculateFundManagerCut();
 
     uint256 platformCut = (platformFee == 0) ? 0 : fundManagerCut.mul(platformFee).div(TOTAL_PERCENTAGE);
@@ -542,13 +546,13 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   // but is an issue that currently exists
 
   event Transfer(address indexed from, address indexed to, uint256 value);
-  
+
   event Approval(address indexed owner, address indexed spender, uint256 value);
 
   uint8 public decimals = 18;
 
   string public symbol = "FND";
-  
+
   mapping (address => mapping (address => uint256)) internal allowed;
 
   /**
@@ -557,7 +561,7 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   function totalSupply() public view returns (uint256) {
     return totalShares;
   }
-  
+
   /**
   * @dev Gets the balance of the specified address.
   *
@@ -568,7 +572,7 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   function balanceOf(address _who) public view returns (uint256) {
     return addressToShares[_who];
   }
-  
+
   /**
   * @dev Transfer shares for a specified address
   *
