@@ -139,7 +139,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     bytes32[] _additionalArgs
  )
    private
-   returns (uint256)
+   returns (uint256 destinationReceived)
  {
    (uint256 minDestinationAmount,
     address[] memory callees,
@@ -174,8 +174,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
      );
    }
 
-   uint256 destinationReceived = tokenBalance(ERC20(destinationToken));
-   return destinationReceived;
+   destinationReceived = tokenBalance(ERC20(destinationToken));
  }
 
  function tokenBalance(ERC20 _token) private view returns (uint256) {
