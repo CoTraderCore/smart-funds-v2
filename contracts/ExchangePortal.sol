@@ -216,7 +216,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   // get best rate from paraswap
   function getValueFromParaswap(address _from, address _to, uint256 _amount) private view returns (uint256){
     IPriceFeed.OptimalRate memory price = priceFeedInterface.getBestPrice(_from, _to, _amount);
-    return price.rate;
+    return uint256(price.rate);
   }
 
   /**
