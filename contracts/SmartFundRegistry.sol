@@ -39,7 +39,7 @@ contract SmartFundRegistry is Ownable {
     platformFee = _platformFee;
     exchangePortalAddress = _exchangePortalAddress;
     permittedExchangesAddress = _permittedExchangesAddress;
-    permittedExchanges = PermittedExchangesInterface(permittedExchanges);
+    permittedExchanges = PermittedExchangesInterface(_permittedExchangesAddress);
   }
 
   /**
