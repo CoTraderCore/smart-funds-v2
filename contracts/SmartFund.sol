@@ -20,6 +20,8 @@ contract SmartFund is SmartFundInterface, Ownable, ERC20 {
   using SafeMath for uint256;
   using SafeERC20 for ERC20;
 
+  uint public version = 2;
+
   // The address of the Exchange Portal
   ExchangePortalInterface public exchangePortal;
 
