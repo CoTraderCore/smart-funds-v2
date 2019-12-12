@@ -203,7 +203,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   * @return The value of `_amount` amount of _from in terms of _to
   */
   function getValue(address _from, address _to, uint256 _amount) public view returns (uint256) {
-     uint256 expectedRate = getValueFromParaswap(_from, _to, _amount);
+     uint256 expectedRate = getBestPrice(_from, _to, _amount);
      uint256 value = expectedRate * _amount / (10 ** uint256(DetailedERC20(_from).decimals()));
 
     return value;
@@ -211,7 +211,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
 
   // get best rate from paraswap
-  function getValueFromParaswap(address _from, address _to, uint256 _amount) private view returns (uint256){
+  function getBestPrice(address _from, address _to, uint256 _amount) public view returns (uint256){
     IPriceFeed.OptimalRate memory price = priceFeedInterface.getBestPrice(_from, _to, _amount);
     return uint256(price.rate);
   }
