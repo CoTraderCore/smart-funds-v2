@@ -19,7 +19,6 @@ module.exports = (deployer, network, accounts) => {
         PLATFORM_FEE,
         ExchangePortal.address,
         PermittedExchanges.address,
-        ParaswapParams.address
       )
     )
 }
