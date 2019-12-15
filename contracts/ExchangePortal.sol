@@ -200,13 +200,11 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   * @param _to        Address of token we're getting the value in
   * @param _amount    The amount of _from
   *
-  * @return The value of `_amount` amount of _from in terms of _to
+  * @return best price from paraswap
   */
   function getValue(address _from, address _to, uint256 _amount) public view returns (uint256) {
-     uint256 expectedRate = getBestPrice(_from, _to, _amount);
-     uint256 value = expectedRate * _amount / (10 ** uint256(DetailedERC20(_from).decimals()));
-
-    return value;
+     uint256 value = getBestPrice(_from, _to, _amount);
+     return value;
   }
 
 
