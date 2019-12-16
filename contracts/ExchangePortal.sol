@@ -15,6 +15,7 @@ import "./paraswap/IParaswapParams.sol";
 contract ExchangePortal is ExchangePortalInterface, Ownable {
   using SafeMath for uint256;
 
+  address public paraswap;
   ParaswapInterface public paraswapInterface;
   IPriceFeedWrapper public priceFeedInterface;
   IParaswapParams public paraswapParams;
@@ -42,6 +43,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   * @param _paraswapParams  helper contract for convert params from bytes32
   */
   constructor(address _paraswap, address _paraswapPrice, address _paraswapParams) public {
+    paraswap = _paraswap;
     paraswapInterface = ParaswapInterface(_paraswap);
     priceFeedInterface = IPriceFeedWrapper(_paraswapPrice);
     paraswapParams = IParaswapParams(_paraswapParams);
