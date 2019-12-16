@@ -22,3 +22,14 @@ PriceFeedWrapper:
 Paraswap params:
 0x0595aaa68ad0fbeacdeeaa7b7d78f22717ade957
 ```
+
+```
+ExchangePortal:
+0xda130b920407cf98dbd2441912837fa4e78f3ddc
+
+PermitedExchanges:
+0x2c8311638d158ddb3fb863c406e186f083bd2a9d
+
+SmartFundRegistry:
+0x967ecb0c7c0dffa2ac1cc61014eb01b1baed0371
+```
