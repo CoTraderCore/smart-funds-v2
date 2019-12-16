@@ -1,5 +1,3 @@
-// Helper for convert paraswap struct return to uint256
-
 pragma solidity 0.5.10;
 pragma experimental ABIEncoderV2;
 
@@ -26,8 +24,8 @@ contract PriceFeedWrapper{
     priceFeedInterface = IPriceFeed(_priceFeedInterface);
   }
 
-  function getBestPrice(address _from, address _to, uint256 _amount) public view returns (uint256 result){
+  function getBestPrice(address _from, address _to, uint256 _amount) external view returns (uint256 result){
     IPriceFeed.OptimalRate memory price = priceFeedInterface.getBestPrice(_from, _to, _amount);
-    result = price.rate;
+    result = uint256(price.rate);
   }
 }
