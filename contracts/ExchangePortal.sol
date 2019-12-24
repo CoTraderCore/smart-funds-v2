@@ -5,7 +5,7 @@ import "./zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./zeppelin-solidity/contracts/math/SafeMath.sol";
 import "./zeppelin-solidity/contracts/token/ERC20/DetailedERC20.sol";
 import "./paraswap/ParaswapInterface.sol";
-import "./paraswap/IPriceFeedWrapper.sol";
+import "./paraswap/IPriceFeed.sol";
 import "./paraswap/IParaswapParams.sol";
 
 /*
@@ -17,7 +17,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
 
   address public paraswap;
   ParaswapInterface public paraswapInterface;
-  IPriceFeedWrapper public priceFeedInterface;
+  IPriceFeed public priceFeedInterface;
   IParaswapParams public paraswapParams;
 
   enum ExchangeType { Paraswap }
@@ -45,7 +45,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   constructor(address _paraswap, address _paraswapPrice, address _paraswapParams) public {
     paraswap = _paraswap;
     paraswapInterface = ParaswapInterface(_paraswap);
-    priceFeedInterface = IPriceFeedWrapper(_paraswapPrice);
+    priceFeedInterface = IPriceFeed(_paraswapPrice);
     paraswapParams = IParaswapParams(_paraswapParams);
   }
 
@@ -203,7 +203,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   * @return best price from paraswap
   */
   function getValue(address _from, address _to, uint256 _amount) public view returns (uint256) {
-     uint256 value = priceFeedInterface.getBestPrice(_from, _to, _amount);
+     uint256 value = priceFeedInterface.getBestPriceSimple(_from, _to, _amount);
      return value;
   }
 
