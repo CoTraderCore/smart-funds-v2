@@ -236,6 +236,16 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     disabledTokens[_token] = _enabled;
   }
 
+  // owner can change IFeed
+  function setNewIFeed(address _paraswapPrice) external onlyOwner {
+    priceFeedInterface = IPriceFeed(_paraswapPrice);
+  }
+
+  // owner can change paraswap Augustus
+  function setNewParaswapMain(address _paraswap) external onlyOwner {
+    paraswapInterface = ParaswapInterface(_paraswap);
+  }
+
   // fallback payable function to receive ether from other contract addresses
   function() public payable {}
 
