@@ -24,12 +24,12 @@ Paraswap params:
 ```
 
 ```
-ExchangePortal:
-0xda130b920407cf98dbd2441912837fa4e78f3ddc
+ExchangePortal :
+0xed81fb581e535bcc817eae1b6bf454cfc3c5ca11
 
-PermitedExchanges:
-0x2c8311638d158ddb3fb863c406e186f083bd2a9d
+PermitedExchange:
+0x15ebf91de109d1fabf8028be33d41d10342d5f4e
 
 SmartFundRegistry:
-0x967ecb0c7c0dffa2ac1cc61014eb01b1baed0371
+0x0f1f46239e6ea6b8922bc4ad343100d47e417a4c
 ```
