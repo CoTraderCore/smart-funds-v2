@@ -13,13 +13,13 @@ RUN Tests
 ```
 
 ```
-Augustus:
-0x72338b82800400f5488eca2b5a37270ba3b7a111
+Augustus (With new param)
+0xF92C1ad75005E6436B4EE84e88cB23Ed8A290988
 
-PriceFeedWrapper:
-0x129e3cbf69261749f7dc622e6473c7ccc774af09
+IFeed
+0xC6A3eC2E62A932B94Bac51B6B9511A4cB623e2E5
 
-Paraswap params:
+Paraswap params
 0x0595aaa68ad0fbeacdeeaa7b7d78f22717ade957
 ```
 
