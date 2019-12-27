@@ -154,6 +154,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
        exchangeData,
        startIndexes,
        values,
+       "CoTrader", // referrer
        mintPrice
      );
    } else {
@@ -167,6 +168,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
        exchangeData,
        startIndexes,
        values,
+       "CoTrader", // referrer
        mintPrice
      );
    }
