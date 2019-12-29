@@ -19,6 +19,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   ParaswapInterface public paraswapInterface;
   IPriceFeed public priceFeedInterface;
   IParaswapParams public paraswapParams;
+  address public paraswapSpender;
 
   enum ExchangeType { Paraswap }
 
@@ -47,6 +48,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
     paraswapInterface = ParaswapInterface(_paraswap);
     priceFeedInterface = IPriceFeed(_paraswapPrice);
     paraswapParams = IParaswapParams(_paraswapParams);
+    paraswapSpender = paraswapInterface.getTokenTransferProxy();
   }
 
 
@@ -158,7 +160,7 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
        mintPrice
      );
    } else {
-     _transferFromSenderAndApproveTo(ERC20(sourceToken), sourceAmount, paraswap);
+     _transferFromSenderAndApproveTo(ERC20(sourceToken), sourceAmount, paraswapSpender);
      paraswapInterface.swap(
        sourceToken,
        destinationToken,
@@ -241,6 +243,11 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   // owner can change IFeed
   function setNewIFeed(address _paraswapPrice) external onlyOwner {
     priceFeedInterface = IPriceFeed(_paraswapPrice);
+  }
+
+  // owner can change paraswap spender address
+  function setNewParaswapSpender(address _paraswapSpender) external onlyOwner {
+    paraswapSpender = _paraswapSpender;
   }
 
   // owner can change paraswap Augustus

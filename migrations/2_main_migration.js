@@ -4,7 +4,7 @@ const SmartFundRegistry = artifacts.require('./SmartFundRegistry.sol')
 const ExchangePortal = artifacts.require('./ExchangePortal.sol')
 const PermittedExchanges = artifacts.require('./PermittedExchanges.sol')
 
-const PARASWAP_NETWORK_ADDRESS = "0x72338b82800400f5488eca2b5a37270ba3b7a111"
+const PARASWAP_NETWORK_ADDRESS = ""
 const PARASWAP_PRICE_ADDRESS = ""
 const PRICE_FEED_ADDRESS = ""
 const PLATFORM_FEE = 1000

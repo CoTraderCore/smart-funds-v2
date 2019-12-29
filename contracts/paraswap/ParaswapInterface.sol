@@ -15,4 +15,6 @@ contract ParaswapInterface{
    )
    public
    payable;
+
+   function getTokenTransferProxy() external view returns (address);
 }
