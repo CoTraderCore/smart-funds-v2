@@ -206,8 +206,12 @@ contract ExchangePortal is ExchangePortalInterface, Ownable {
   *
   * @return best price from paraswap
   */
-  function getValue(address _from, address _to, uint256 _amount) public view returns (uint256) {
-     uint256 value = priceFeedInterface.getBestPriceSimple(_from, _to, _amount);
+  function getValue(address _from, address _to, uint256 _amount) public view returns (uint256 value) {
+     if(_amount > 0){
+       value = priceFeedInterface.getBestPriceSimple(_from, _to, _amount);
+     }else{
+       value = 0;
+     }
      return value;
   }
 
